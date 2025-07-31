@@ -20,3 +20,17 @@ sympy>=1.8.0
 # Utilitários
 tqdm>=4.60.0
 seaborn>=0.11.0
+
+# NILMTK e dependências HDF5
+h5py>=3.1.0
+tables>=3.6.1
+numexpr>=2.7.0
+
+# NILMTK (opcional - pode ter problemas de instalação)
+# nilmtk>=0.4.0
+
+# Análise de dados temporal
+statsmodels>=0.12.0
+
+# Processamento paralelo
+joblib>=1.0.0

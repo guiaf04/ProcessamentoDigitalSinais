@@ -42,7 +42,11 @@ ProcessamentoDigitalSinais/
 │   ├── signal_analyzer.py           # Interface Python tempo real
 │   ├── data_analyzer.py             # Análise offline de dados
 │   ├── nilm_filters.c/.h            # Biblioteca de filtros
-│   └── signal_analysis_data.csv     # Base de dados coletados
+│   ├── signal_analysis_data.csv     # Base de dados coletados
+│   ├── esp32_to_nilmtk.py          # 🔄 Conversor ESP32 → NILMTK
+│   ├── nilmtk_analyzer.py          # 📊 Analisador de dados NILMTK
+│   ├── ESP32_NILMTK_Integration.ipynb # 📓 Notebook integração NILMTK
+│   └── example_usage.py            # 🎯 Exemplo de uso completo
 │
 ├── 📁 Filtros/                    # 📚 Conceitos DSP - Filtros Digitais
 │   ├── Filtro_FIR.ipynb             # Implementação e teoria filtros FIR
@@ -80,6 +84,8 @@ ProcessamentoDigitalSinais/
 - **Armazenamento**: Dados salvos automaticamente em CSV
 - **Análise Offline**: Ferramentas para processamento pós-coleta
 - **Integração DSP**: Aplicação prática dos conceitos implementados nos notebooks
+- **🔄 Integração NILMTK**: Conversão automática para formato NILMTK (HDF5)
+- **📊 Análise Avançada**: Detecção de eventos, padrões de consumo e relatórios
 
 ## ⚙️ Configuração e Instalação
 
@@ -107,6 +113,11 @@ sympy >= 1.8.0
 
 # Comunicação serial (NILM)
 pyserial >= 3.5
+
+# NILMTK e análise NILM
+h5py >= 3.1.0
+tables >= 3.6.1
+# nilmtk >= 0.4.0 (opcional)
 ```
 
 ### 2. �🔧 Hardware ESP32-S3 (Módulo NILM)
@@ -152,6 +163,15 @@ python dsp_esp32/signal_analyzer.py
 
 # Análise de dados offline
 python dsp_esp32/data_analyzer.py
+
+# 🔄 Conversão para NILMTK
+python dsp_esp32/esp32_to_nilmtk.py
+
+# 📊 Análise com NILMTK
+python dsp_esp32/nilmtk_analyzer.py
+
+# 🎯 Exemplo completo
+python dsp_esp32/example_usage.py
 ```
 
 ## 📝 Conteúdo dos Módulos
@@ -198,6 +218,34 @@ O sistema NILM demonstra a aplicação prática dos conceitos estudados nos note
 - **Filtros em Tempo Real**: Implementação de filtros IIR em C para ESP32
 - **FFT Embarcada**: Análise espectral em tempo real com 512 pontos
 - **Processamento de Sinais**: Pipeline completo desde aquisição até classificação
+
+#### 🔄 Integração com NILMTK
+Nova funcionalidade que permite integração completa com o ecossistema NILMTK:
+
+**📊 Conversão de Dados**:
+- **`esp32_to_nilmtk.py`**: Converte dados CSV da ESP32 para formato HDF5 compatível com NILMTK
+- **Metadata Automático**: Gera metadados necessários para análise NILM
+- **Calibração**: Converte valores ADC para unidades físicas (V, A, W)
+
+**📈 Análise Avançada**:
+- **`nilmtk_analyzer.py`**: Carrega e analisa dados NILMTK convertidos
+- **Detecção de Eventos**: Identifica automaticamente liga/desliga de aparelhos
+- **Padrões de Consumo**: Análise temporal e estatística do consumo
+- **Visualizações**: Gráficos especializados para análise NILM
+
+**📓 Notebook Interativo**:
+- **`ESP32_NILMTK_Integration.ipynb`**: Tutorial completo de integração
+- **Passo a passo**: Desde conversão até análise avançada
+- **Exemplos Práticos**: Casos de uso reais com dados da ESP32
+
+#### 🚀 Uso Rápido
+```bash
+# Conversão e análise em um comando
+python dsp_esp32/example_usage.py
+
+# Ou usando o notebook interativo
+jupyter notebook dsp_esp32/ESP32_NILMTK_Integration.ipynb
+```
 
 ## 🔬 Metodologia NILM
 
