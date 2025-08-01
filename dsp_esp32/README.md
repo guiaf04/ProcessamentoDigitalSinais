@@ -14,12 +14,18 @@ Sistema completo para análise de sinais em tempo real usando ESP32-S3 e interfa
 - **Visualização**: 4 gráficos em tempo real
 - **Armazenamento**: Dados salvos automaticamente em CSV
 - **Análise**: Ferramentas para análise offline dos dados
+- **NILMTK Integration**: Conversão para formato NILMTK (HDF5)
+- **NILM Analysis**: Análise especializada para detecção de cargas
 
 ## 🛠️ Estrutura do Projeto
 
 ```
 dsp_esp32/
 ├── data_analyzer.py        #código para leitura da base de dados obtida
+├── esp32_to_nilmtk.py      #conversão ESP32 → NILMTK (HDF5)
+├── nilmtk_analyzer.py      #análise de dados NILMTK
+├── example_usage.py        #exemplo de uso integração NILMTK
+├── ESP32_NILMTK_Integration.ipynb  #jupyter notebook demonstração
 ├── Processamento_Digital_de_Sinais_com_a_ESP32S3.pdf  #relatório
 ├── README.md
 ├── signal_analysis_data.csv #base de dados criada com algumas amostras
@@ -61,6 +67,10 @@ Component config → ADC →
 #### Dependências
 ```bash
 pip install pyqt5 pyqtgraph serial pandas numpy matplotlib
+
+# Para integração NILMTK (opcional)
+pip install h5py seaborn
+# pip install nilmtk  # Instalação opcional para funcionalidades avançadas
 ```
 
 #### Execução
@@ -106,7 +116,95 @@ python data_analyzer.py --stats --save
 python data_analyzer.py --help
 ```
 
-## 📊 Formato dos Dados
+### 4. Integração NILMTK (Non-Intrusive Load Monitoring)
+
+#### Conversão ESP32 → NILMTK
+```bash
+# Conversão básica para formato NILMTK (HDF5)
+python -c "
+from esp32_to_nilmtk import convert_esp32_to_nilmtk
+convert_esp32_to_nilmtk('signal_analysis_data.csv', 'dataset_nilmtk.h5')
+"
+
+# Exemplo completo de uso
+python example_usage.py
+```
+
+#### Análise NILMTK dos dados
+```bash
+# Análise exploratória
+python -c "
+from nilmtk_analyzer import analyze_esp32_nilmtk_data
+analyze_esp32_nilmtk_data('dataset_nilmtk.h5')
+"
+```
+
+#### Funcionalidades NILMTK:
+- **Conversão automática**: CSV ESP32 → HDF5 NILMTK
+- **Metadata configurável**: Informações do dataset
+- **Análise de potência**: Cálculo automático P = V × I
+- **Visualizações NILM**: Gráficos especializados para detecção de cargas
+- **Compatibilidade**: Funciona com/sem NILMTK instalado
+- **Jupyter Integration**: Notebook demonstrativo incluído
+
+## � Módulo NILMTK Integration
+
+### Visão Geral
+O sistema agora inclui integração completa com NILMTK (Non-Intrusive Load Monitoring Toolkit) para análise avançada de cargas elétricas. Os dados coletados pela ESP32 podem ser convertidos automaticamente para o formato padrão NILMTK (HDF5) e analisados com ferramentas especializadas.
+
+### Arquivos do Módulo NILMTK:
+- **`esp32_to_nilmtk.py`**: Conversor ESP32 CSV → NILMTK HDF5
+- **`nilmtk_analyzer.py`**: Analisador especializado para dados NILMTK
+- **`example_usage.py`**: Script de demonstração completa
+- **`ESP32_NILMTK_Integration.ipynb`**: Jupyter Notebook interativo
+
+### Funcionalidades Principais:
+
+#### 1. Conversão Automática
+```python
+from esp32_to_nilmtk import convert_esp32_to_nilmtk
+
+# Conversão simples
+convert_esp32_to_nilmtk(
+    csv_file='signal_analysis_data.csv',
+    output_hdf5='dataset_nilmtk.h5'
+)
+```
+
+#### 2. Análise NILM Avançada
+```python
+from nilmtk_analyzer import analyze_esp32_nilmtk_data
+
+# Análise completa com visualizações
+report = analyze_esp32_nilmtk_data('dataset_nilmtk.h5')
+```
+
+#### 3. Processamento de Potência
+- Cálculo automático de potência: P = V × I
+- Estimativa de corrente baseada em tensão ADC
+- Detecção de eventos de ligar/desligar cargas
+- Análise de consumo energético
+
+#### 4. Visualizações Especializadas
+- Gráficos de potência vs tempo
+- Histogramas de consumo
+- Detecção de padrões de uso
+- Análise de harmônicos
+- Mapas de calor de atividade
+
+#### 5. Compatibilidade
+- **Com NILMTK**: Funcionalidades completas de disagregação
+- **Sem NILMTK**: Carregamento manual HDF5 e análises básicas
+- **Jupyter Ready**: Notebooks prontos para exploração
+
+### Workflow Completo:
+1. **Coleta**: ESP32 → Serial → CSV
+2. **Conversão**: CSV → HDF5 (formato NILMTK)
+3. **Análise**: Carregamento e processamento NILMTK
+4. **Visualização**: Gráficos especializados NILM
+5. **Relatório**: Geração de relatórios automáticos
+
+## �📊 Formato dos Dados
 
 ### Arquivo CSV
 ```csv
@@ -124,6 +222,19 @@ timestamp,packet_id,data_type,index,time_or_freq,amplitude_or_magnitude
 - **fft_original**: FFT do sinal original
 - **fft_filtered**: FFT do sinal filtrado
 
+### Formato NILMTK (HDF5):
+```
+dataset_nilmtk.h5
+├── building1/
+│   ├── elec/
+│   │   └── meter1/
+│   │       ├── power/active    # Potência ativa calculada
+│   │       ├── voltage         # Tensão do sinal
+│   │       ├── current         # Corrente estimada
+│   │       └── timestamps      # Timestamps Unix
+│   └── metadata/               # Metadata do dataset
+```
+
 ## 🔧 Configurações Importantes
 
 ### ESP32 (signal_analyzer.c):
@@ -139,6 +250,15 @@ timestamp,packet_id,data_type,index,time_or_freq,amplitude_or_magnitude
 SERIAL_PORT = '/dev/ttyACM0'   # Porta serial
 BAUD_RATE = 115200             # Velocidade
 CSV_FILENAME = 'signal_analysis_data.csv'  # Arquivo de dados
+```
+
+### NILMTK (esp32_to_nilmtk.py):
+```python
+# Configurações de conversão
+VOLTAGE_SCALE = 3.3/4096       # Escala ADC para tensão
+CURRENT_ESTIMATION = True      # Estimar corrente a partir da tensão
+POWER_CALCULATION = True       # Calcular potência P = V × I
+SAMPLE_RATE = 10000            # Taxa de amostragem (Hz)
 ```
 
 ## 📈 Exemplos de Uso
@@ -175,6 +295,29 @@ signals = df[df['data_type'] == 'signal_original']
 # ... seu código aqui
 ```
 
+### 4. Análise NILM com NILMTK
+```python
+from esp32_to_nilmtk import ESP32ToNILMTK
+from nilmtk_analyzer import NILMTKAnalyzer
+
+# Conversão para NILMTK
+converter = ESP32ToNILMTK('signal_analysis_data.csv')
+converter.load_esp32_data()
+hdf5_file = converter.convert_to_nilmtk('dataset.h5')
+
+# Análise NILMTK
+analyzer = NILMTKAnalyzer(hdf5_file)
+analyzer.load_dataset()
+
+# Análise de potência
+power_data = analyzer.get_power_data()
+analyzer.plot_power_analysis()
+
+# Detecção de eventos
+events = analyzer.detect_power_events()
+analyzer.plot_event_detection()
+```
+
 ## 🔍 Monitoramento e Debug
 
 ### ESP32 - Logs
@@ -190,6 +333,16 @@ I (34567) SIGNAL_ANALYZER: Avg Original: 1.652V, Avg Filtered: 1.651V
 [INFO] Arquivo CSV criado: signal_analysis_data.csv
 [INFO] Gráficos atualizados - Pacote #1
 [INFO] 2048 pontos salvos no CSV
+```
+
+### NILMTK - Console
+```
+📂 Carregando dados de: signal_analysis_data.csv
+✅ Dados carregados: 2048 registros
+📊 Período: 2025-07-29 10:30:15 até 2025-07-29 10:30:16
+🔄 Convertendo para formato NILMTK...
+💾 Dataset salvo: dataset_nilmtk.h5
+📈 Análise NILM concluída
 ```
 
 ## 🐛 Troubleshooting
@@ -217,6 +370,16 @@ I (34567) SIGNAL_ANALYZER: Avg Original: 1.652V, Avg Filtered: 1.651V
    - Limpe arquivo periodicamente
    - Ajuste `SEND_INTERVAL` no ESP32
 
+5. **Problemas na conversão NILMTK**
+   - Verificar formato do CSV ESP32
+   - Instalar dependências: `pip install h5py`
+   - Verificar espaço em disco para arquivo HDF5
+
+6. **NILMTK não instalado**
+   - Módulo funciona sem NILMTK (modo manual)
+   - Para funcionalidades completas: `pip install nilmtk`
+   - Use Jupyter Notebook para exploração interativa
+
 ## 🚀 Melhorias Futuras
 
 - [ ] Interface web em tempo real
@@ -224,7 +387,12 @@ I (34567) SIGNAL_ANALYZER: Avg Original: 1.652V, Avg Filtered: 1.651V
 - [ ] Filtros configuráveis dinamicamente
 - [ ] Triggers automáticos para captura
 - [ ] Exportação para formatos científicos (HDF5, MAT)
-- [ ] Integração com Jupyter Notebooks
+- [x] Integração com NILMTK para análise NILM
+- [x] Jupyter Notebooks para exploração interativa
+- [ ] Algoritmos de disagregação de cargas
+- [ ] Interface gráfica para análise NILMTK
+- [ ] Detecção automática de appliances
+- [ ] Dashboard web para monitoramento NILM
 
 ## 📝 Licença
 
